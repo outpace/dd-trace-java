@@ -69,7 +69,7 @@ public class TracingRequestHandler extends RequestHandler2 {
 
     tracer.inject(
         span.context(),
-        Format.Builtin.HTTP_HEADERS,
+        Format.Builtin.TEXT_MAP_INJECT,
         new TextMapInjectAdapter(request.getHeaders()));
 
     request.addHandlerContext(contextKey, span);

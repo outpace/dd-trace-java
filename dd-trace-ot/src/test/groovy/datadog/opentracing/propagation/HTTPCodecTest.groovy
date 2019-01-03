@@ -5,8 +5,7 @@ import datadog.opentracing.DDTracer
 import datadog.opentracing.PendingTrace
 import datadog.trace.api.sampling.PrioritySampling
 import datadog.trace.common.writer.ListWriter
-import io.opentracing.propagation.TextMapExtractAdapter
-import io.opentracing.propagation.TextMapInjectAdapter
+import io.opentracing.propagation.TextMapAdapter
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -51,7 +50,7 @@ class HTTPCodecTest extends Specification {
 
     final Map<String, String> carrier = new HashMap<>()
 
-    codec.inject(mockedContext, new TextMapInjectAdapter(carrier))
+    codec.inject(mockedContext, new TextMapAdapter(carrier))
 
     expect:
     carrier.get(TRACE_ID_KEY) == "1"
@@ -96,7 +95,7 @@ class HTTPCodecTest extends Specification {
 
     final Map<String, String> carrier = new HashMap<>()
 
-    codec.inject(mockedContext, new TextMapInjectAdapter(carrier))
+    codec.inject(mockedContext, new TextMapAdapter(carrier))
 
     expect:
     carrier.get(TRACE_ID_KEY) == largeTraceId
@@ -141,7 +140,7 @@ class HTTPCodecTest extends Specification {
 
     final Map<String, String> carrier = new HashMap<>()
 
-    codec.inject(mockedContext, new TextMapInjectAdapter(carrier))
+    codec.inject(mockedContext, new TextMapAdapter(carrier))
 
     expect:
     carrier.get(TRACE_ID_KEY) == largeTraceId
@@ -170,7 +169,7 @@ class HTTPCodecTest extends Specification {
       actual.put(SAMPLING_PRIORITY_KEY, String.valueOf(samplingPriority))
     }
 
-    final ExtractedContext context = codec.extract(new TextMapExtractAdapter(actual))
+    final ExtractedContext context = codec.extract(new TextMapAdapter(actual))
 
     expect:
     context.getTraceId() == "1"
@@ -192,7 +191,7 @@ class HTTPCodecTest extends Specification {
       SOME_HEADER: "my-interesting-info",
     ]
 
-    TagContext context = codec.extract(new TextMapExtractAdapter(actual))
+    TagContext context = codec.extract(new TextMapAdapter(actual))
 
     expect:
     !(context instanceof ExtractedContext)
@@ -201,7 +200,7 @@ class HTTPCodecTest extends Specification {
 
   def "extract empty headers returns null"() {
     expect:
-    codec.extract(new TextMapExtractAdapter(["ignored-header": "ignored-value"])) == null
+    codec.extract(new TextMapAdapter(["ignored-header": "ignored-value"])) == null
   }
 
   def "extract http headers with larger than Java long IDs"() {
@@ -220,7 +219,7 @@ class HTTPCodecTest extends Specification {
       actual.put(SAMPLING_PRIORITY_KEY, String.valueOf(samplingPriority))
     }
 
-    final ExtractedContext context = codec.extract(new TextMapExtractAdapter(actual))
+    final ExtractedContext context = codec.extract(new TextMapAdapter(actual))
 
     expect:
     context.getTraceId() == largeTraceId
@@ -251,7 +250,7 @@ class HTTPCodecTest extends Specification {
       actual.put(SAMPLING_PRIORITY_KEY, String.valueOf(samplingPriority))
     }
 
-    final ExtractedContext context = codec.extract(new TextMapExtractAdapter(actual))
+    final ExtractedContext context = codec.extract(new TextMapAdapter(actual))
 
     expect:
     context.getTraceId() == BIG_INTEGER_UINT64_MAX.toString()
@@ -282,7 +281,7 @@ class HTTPCodecTest extends Specification {
     }
 
     when:
-    codec.extract(new TextMapExtractAdapter(actual))
+    codec.extract(new TextMapAdapter(actual))
 
     then:
     def iae = thrown(IllegalArgumentException)
@@ -310,7 +309,7 @@ class HTTPCodecTest extends Specification {
     }
 
     when:
-    codec.extract(new TextMapExtractAdapter(actual))
+    codec.extract(new TextMapAdapter(actual))
 
     then:
     thrown(IllegalArgumentException)
@@ -336,7 +335,7 @@ class HTTPCodecTest extends Specification {
     }
 
     when:
-    codec.extract(new TextMapExtractAdapter(actual))
+    codec.extract(new TextMapAdapter(actual))
 
     then:
     thrown(IllegalArgumentException)
